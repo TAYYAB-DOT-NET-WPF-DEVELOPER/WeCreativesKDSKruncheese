@@ -1,0 +1,17 @@
+﻿<Application x:Class="WeCreativesKDSKruncheese.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WeCreativesKDSKruncheese"
+             >
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+
+                <ResourceDictionary Source="/Themes/ButtonStyles.xaml" />
+                <ResourceDictionary Source="/Themes/MainTheme.xaml"/>
+                <ResourceDictionary Source="/Assets/Icons.xaml"/>
+
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
