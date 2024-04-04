@@ -7,15 +7,65 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using WeCreativesKDSKruncheese;
 
 namespace WeCreatives_KDSPJ.Connections
 {
     public class MainWindowVM : ViewModelBase
     {
-       // DateTime maxOpenDate;
-       
+        // DateTime maxOpenDate;
+        string kdcLocValue = App.KdcLoc;
+
+        public static int KDSLOC { get; set; }
+        private string _kdsnamee = App.KdcName;
+        public string KDSNAMEE
+        {
+            get => _kdsnamee;
+            set
+            {
+                if (_kdsnamee != value)
+                {
+                    _kdsnamee = value;
+                    OnPropertyChanged(nameof(KDSNAMEE));
+                    // If other properties' visibility depends on KDSNAMEE, trigger their change notification too
+                    OnPropertyChanged(nameof(IsFryer));
+                    OnPropertyChanged(nameof(IsMakeTimeVisible));
+                    OnPropertyChanged(nameof(IsRackTimeVisible));
+                    UpdateStatusVisibility();
+                    // Continue with other dependent properties as needed
+                }
+            }
+        }
+
         private readonly StatusQuery _querystrings;
         private DateTime _kdsdateTime;
+        public string KDSNAME
+        {
+            get => _kDSNAME;
+            set
+            {
+                if (_kDSNAME != value)
+                {
+                    _kDSNAME = value;
+                    OnPropertyChanged(nameof(KDSNAME));
+                    // Trigger the OnPropertyChanged for dependent properties
+                    OnPropertyChanged(nameof(IsFryer));
+                    OnPropertyChanged(nameof(IsMakeTimeVisible));
+                    OnPropertyChanged(nameof(IsRackTimeVisible));
+                    // Add more as needed for each status
+                }
+            }
+        }
+
+        public bool IsFryer => KDSNAME.Equals("KDS FRYER", StringComparison.OrdinalIgnoreCase);
+        public bool IsASSEMBLY => KDSNAME.Equals("ASSEMBLY STATION", StringComparison.OrdinalIgnoreCase);
+
+        // Controls visibility of Make Time based on KDSNAME
+        public bool IsMakeTimeVisible => IsFryer;
+        public bool IsAssemblyVisible => IsASSEMBLY;
+
+        // Controls visibility of Rack Time based on KDSNAME
+        public bool IsRackTimeVisible => !IsFryer && !IsASSEMBLY;
 
         public DateTime KdsdateTime
         {
@@ -65,6 +115,13 @@ namespace WeCreatives_KDSPJ.Connections
             get => _averageCSCtime;
             set { _averageCSCtime = value; OnPropertyChanged(nameof(AverageoCSCTime)); }
         }
+        private string _kDSNAME;
+        public string KDSAPPNAME
+        {
+            get => _kDSNAME;
+            set { _kDSNAME = value; OnPropertyChanged(nameof(KDSAPPNAME)); }
+        }
+
          private int _currentItemCount;
         public int CurrentItemCount
         {
@@ -100,6 +157,10 @@ namespace WeCreatives_KDSPJ.Connections
         public MainWindowVM( StatusQuery statusQuery)
         {
             _querystrings = statusQuery;
+            KDSNAME = KDSNAMEE;
+            KDSAPPNAME = KDSNAME;
+
+             KDSLOC = Convert.ToInt32(kdcLocValue);
             AllOrders = new ObservableCollection<KDSModel>();
             _orderCheckTimer = new DispatcherTimer();
             DispatcherTimer realTimeUpdateTimer = new DispatcherTimer();
@@ -125,6 +186,13 @@ namespace WeCreatives_KDSPJ.Connections
             };
             _orderCheckTimer.Start();
             SelectedIndex = 0; 
+        }
+        private void UpdateStatusVisibility()
+        {
+            OnPropertyChanged(nameof(IsFryer));
+            OnPropertyChanged(nameof(IsMakeTimeVisible));
+            OnPropertyChanged(nameof(IsRackTimeVisible));
+            // Add OnPropertyChanged for each status visibility property you add
         }
         private void KeyDownHandler(object key)
         {
@@ -173,7 +241,7 @@ namespace WeCreatives_KDSPJ.Connections
 
                 string query = "update kds set bumped=1 , bump_time="+totalBumpingTimeSeconds+" where pkcode=" + trno;
                // string query = "update kds set bumped=1  where trno=" + trno;
-                string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=182.180.159.89)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
+                string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=KRC)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
@@ -197,15 +265,17 @@ namespace WeCreatives_KDSPJ.Connections
         }
         public static int GetTotal()
         {
+            
             using (OracleHelper.GetCon())
-                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds ").Rows[0][0]);
+                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE KDS_LOC =  " + KDSLOC).Rows[0][0]);
         }
         public  string GetAverageMakeTime()
         {
             string query = _querystrings.average_make_time;
+            string queryparameter = query + "and KDS_LOC=" + KDSLOC;
 
             using (OracleHelper.GetCon())
-                return (OracleHelper.SelectRec(query).Rows[0][0]).ToString();
+                return (OracleHelper.SelectRec(queryparameter).Rows[0][0]).ToString();
         } 
         public  string GetAverageRackTime()
         {
@@ -238,7 +308,7 @@ namespace WeCreatives_KDSPJ.Connections
         public static int GetCurrentTotal()
         {
             using (OracleHelper.GetCon())
-                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 ").Rows[0][0]);
+                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 AND KDS_LOC= " + KDSLOC).Rows[0][0]);
         }
         private void FocusGrid()
         {
@@ -263,8 +333,9 @@ namespace WeCreatives_KDSPJ.Connections
             try
             {
                 ObservableCollection<KDSModel> orders = new ObservableCollection<KDSModel>();
-                string query = @"select * from KDS where bumped <>1 ";
-                string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=182.180.159.89)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
+                var KDSLOC = Convert.ToInt32(kdcLocValue);
+                string query = @"select * from KDS where bumped <>1 AND KDS_LOC = " + KDSLOC;
+                string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=KRC)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
                     connection.Open();
@@ -302,18 +373,19 @@ namespace WeCreatives_KDSPJ.Connections
                                     model.UpdateDisplayTime(); // Ensure this method updates the DisplayTime based on the StartTime.
 
                                     orders.Add(model);
-                                    AllOrders = orders;
+                                    
                                 }
 
                                
                             }
+                            AllOrders = orders;
                         }
                         
                     }
                 }
                 TotalItemCount = GetTotal();
                 CurrentItemCount=GetCurrentTotal();
-                //AverageMakeTime = GetAverageMakeTime();
+                AverageMakeTime = GetAverageMakeTime();
                 //AverageoCSCTime =GetAverageCSCPERCENTAGE();
                 //AverageotdTime =GetAverageOTDTime();
                 //AverageottdtTime = GetAverageTTDTTime();

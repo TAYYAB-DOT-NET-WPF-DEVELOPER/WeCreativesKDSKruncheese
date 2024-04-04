@@ -11,6 +11,8 @@
   <ItemGroup>
     <None Remove="Assets\Logo.ico" />
     <None Remove="Views\Krunchesse.png" />
+    <None Remove="Views\WeCreatives.png" />
+    <None Remove="Views\WeCreativesLogo.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +31,8 @@
   <ItemGroup>
     <Resource Include="Assets\Logo.ico" />
     <Resource Include="Views\Krunchesse.png" />
+    <Resource Include="Views\WeCreatives.png" />
+    <Resource Include="Views\WeCreativesLogo.png" />
   </ItemGroup>
 
 </Project>

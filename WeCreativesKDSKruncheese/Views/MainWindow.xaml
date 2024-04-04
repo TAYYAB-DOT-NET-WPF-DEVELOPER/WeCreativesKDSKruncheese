@@ -8,9 +8,13 @@
  Icon="/Views/Krunchesse.png"
         mc:Ignorable="d"
         Title="WeCreatives  KRUNCHEESE KDS"
-     
+     WindowStyle="None"
  WindowStartupLocation="CenterScreen" 
         WindowState="Maximized">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -29,57 +33,58 @@
 
             <!-- Navigation items, adjust as needed -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10">
-                <Label Content="Total Item:" FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding TotalItemCount}" FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                <Label Content="Total Item:" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TotalItemCount}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10">
-                <Label Content="Current Item:" FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding CurrentItemCount}" FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                <Label Content="Current Item:" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentItemCount}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0"/>
             </StackPanel>
-            <TextBlock Text="{Binding CurrentTime}" Grid.Column="2" Margin="10" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+            <TextBlock Text="{Binding CurrentTime}" Grid.Column="2" Margin="10" FontSize="25" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
         </Grid>
 
         <!-- Main Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="5*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            
 
             <!-- Left Panel - List View -->
             <Border Grid.Row="0" Background="Transparent">
-                <ListView x:Name="listView" Grid.Row="1"
-       BorderBrush="{DynamicResource Color3}"
-       BorderThickness="2"
-       ItemsSource="{Binding AllOrders}" 
-       SelectedIndex="{Binding SelectedIndex}"
-       MaxHeight="{Binding ActualHeight, ElementName=listview}"
-       ScrollViewer.VerticalScrollBarVisibility="Auto"
-       ScrollViewer.CanContentScroll="True"
-       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-       conn:ListViewKeyDownBehavior.Command="{Binding KeyDownCommand}">
-
+                <ListView x:Name="listView"
+          BorderBrush="{DynamicResource Color3}"
+          BorderThickness="2"
+          ItemsSource="{Binding AllOrders}" 
+          SelectedIndex="{Binding SelectedIndex}"
+          MaxHeight="{Binding ActualHeight, ElementName=listview}"
+          ScrollViewer.VerticalScrollBarVisibility="Auto"
+          ScrollViewer.CanContentScroll="True"
+          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+          conn:ListViewKeyDownBehavior.Command="{Binding KeyDownCommand}">
                     <ListView.View>
-                        <GridView >
-                            <GridView.Columns>
-                                <GridViewColumn Header="TRN#" Width="60">
+                        <GridView  >
+                            
+                            <GridView.Columns >
+                                <GridViewColumn Header="TRN#" Width="80">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Transact}" FontSize="20"/>
+                                            <TextBlock Text="{Binding Transact}" FontSize="30"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="ITEMS" Width="720" >
+                                <GridViewColumn Header="ITEMS" Width="950">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Descript}" FontSize="20"/>
+                                            <TextBlock Text="{Binding Descript}" FontSize="30"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
                                 <GridViewColumn Header="TYPE" Width="180">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding TYPE}" FontSize="20"/>
+                                            <TextBlock Text="{Binding TYPE}" FontSize="30"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -89,7 +94,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <!-- Bind to the DisplayTime property which will be updated every second -->
-                                            <TextBlock Text="{Binding DisplayTime}" FontSize="20"/>
+                                            <TextBlock Text="{Binding DisplayTime}" FontSize="30"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
@@ -99,7 +104,7 @@
                                 <Style TargetType="GridViewColumnHeader">
                                     <Setter Property="IsEnabled" Value="False"/>
                                     <Setter Property="Background" Value="{DynamicResource Color3}"/>
-                                    <Setter Property="FontSize" Value="18"/>
+                                    <Setter Property="FontSize" Value="30"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                     <Style.Triggers>
                                         <Trigger Property="IsEnabled" Value="False">
@@ -120,32 +125,64 @@
 
             <!-- Right Panel - Status Display -->
             <Border Grid.Column="1" Background="{DynamicResource Color3}">
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top">
-                    <!-- Logo at the top -->
-                    <Image Source="/Views/Krunchesse.png" Height="200" Margin="20"/>
+                <Grid>
+                    <!--<Grid.RowDefinitions>
+                        
+                        <RowDefinition Height="Auto"/>
+                        --><!-- For the content at the top --><!--
+                        <RowDefinition Height="*"/>
+                        --><!-- For spacing --><!--
+                        <RowDefinition Height="Auto"/>
+                        --><!-- For the image at the bottom --><!--
+                    </Grid.RowDefinitions>-->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <!-- Logo and status information at the top -->
+                    <StackPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top">
+                        <!-- Logo at the top -->
+                    <Image Source="/Views/Krunchesse.png" Height="150" />
                     <!-- Status information below -->
-                    <TextBlock Margin="20,20,20,5" Text="KDS Fryer" TextAlignment="Center" FontSize="30" FontWeight="Bold" Foreground="White"/>
-                    <StackPanel Orientation="Horizontal" Margin="20,5,20,5">
-                        <Label Content="Make Time:" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding AverageMakeTime}" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <TextBlock  Text="{Binding KDSAPPNAME}" TextAlignment="Center" Margin="10 10 10 10" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <StackPanel Orientation="Horizontal" Margin="10 10 10 10">
+                        <Label Content="FRYER Time:" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"
+                        Visibility="{Binding IsMakeTimeVisible, Converter={StaticResource BoolToVisConverter}}"/>
+                            <TextBlock Text="{Binding AverageMakeTime}"  Visibility="{Binding IsMakeTimeVisible, Converter={StaticResource BoolToVisConverter}}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="20,5,20,5">
-                        <Label Content="Rack Time:" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding AverageRackTime}" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10 10 10 10" Visibility="{Binding IsAssemblyVisible, Converter={StaticResource BoolToVisConverter}}">
+                        <Label Content="ASSEMBLY TIME:" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"
+                          />
+                        <TextBlock Text="{Binding AverageMakeTime}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="20,5,20,5">
-                        <Label Content="OTD :" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding AverageotdTime}" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="10 10 10 10">
+                            <Label Content="MAKE TIME:" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"
+                            Visibility="{Binding IsRackTimeVisible, Converter={StaticResource BoolToVisConverter}}"/>
+                            <TextBlock Text="{Binding AverageMakeTime}"  Visibility="{Binding IsRackTimeVisible, Converter={StaticResource BoolToVisConverter}}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"  Visibility="{Binding IsRackTimeVisible, Converter={StaticResource BoolToVisConverter}}" >
+                        <Label Content="Rack Time:" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding AverageRackTime}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="20,5,20,5">
-                        <Label Content="CSC :" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding AverageoCSCTime}" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsRackTimeVisible, Converter={StaticResource BoolToVisConverter}}">
+                        <Label Content="OTD :" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding AverageotdTime}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="20,5,20,5">
-                        <Label Content="TTDT :" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding AverageottdtTime}" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsRackTimeVisible, Converter={StaticResource BoolToVisConverter}}">
+                        <Label Content="CSC :" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding AverageoCSCTime}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                     </StackPanel>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding IsRackTimeVisible, Converter={StaticResource BoolToVisConverter}}">
+                        <Label Content="TTDT :" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding AverageottdtTime}" FontSize="25" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                    </StackPanel>
+                    </StackPanel>
+                    <Image Grid.Row="2" Source="/Views/WeCreatives.png" Height="150" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+
+                </Grid>
+
+
             </Border>
 
         </Grid>

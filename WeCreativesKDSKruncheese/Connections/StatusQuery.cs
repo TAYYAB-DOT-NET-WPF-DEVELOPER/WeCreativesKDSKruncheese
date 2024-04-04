@@ -8,7 +8,7 @@ namespace WeCreatives_KDSPJ.Connections
 {
     public class StatusQuery
     {
-        public string average_make_time = @"SELECT TO_CHAR(TRUNC(AVG(bumping_time) / 60), 'FM00') || ':' || TO_CHAR(MOD(AVG(bumping_time), 60), 'FM00') AS avg_bumping_time  FROM     kds WHERE snum = 31 and opendate = (select max(opendate)from kds ) and BUMPING_TIME is not null ";
+        public string average_make_time = @"SELECT TO_CHAR(TRUNC(AVG(bump_time) / 60), 'FM00') || ':' || TO_CHAR(MOD(AVG(bump_time), 60), 'FM00') AS avg_bumping_time  FROM     kds WHERE  BUMP_TIME is not null ";
         public string average_rack_time = @"WITH TimeData AS (
     SELECT 
         CASE 

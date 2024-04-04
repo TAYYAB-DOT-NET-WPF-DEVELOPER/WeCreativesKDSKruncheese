@@ -17,6 +17,9 @@ namespace WeCreativesKDSKruncheese
     public partial class App : Application
     {
         private IServiceProvider _serviceprovider;
+        public static string KdcLoc => ConfigurationManager.AppSettings["KDCLOC"];
+        public static string KdcName => ConfigurationManager.AppSettings["AppName"];
+
         public App()
         {
             ConfigureServices();
