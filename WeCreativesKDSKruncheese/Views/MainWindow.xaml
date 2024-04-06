@@ -74,14 +74,14 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="ITEMS" Width="950">
+                                <GridViewColumn Header="ITEMS" Width="1150">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Descript}" FontSize="30"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="TYPE" Width="180">
+                                <GridViewColumn Header="TYPE" Width="230">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding TYPE}" FontSize="30"/>

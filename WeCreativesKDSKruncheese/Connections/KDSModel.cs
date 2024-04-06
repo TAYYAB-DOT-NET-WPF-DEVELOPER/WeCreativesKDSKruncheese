@@ -44,8 +44,10 @@ namespace WeCreatives_KDSPJ.Connections
         public void UpdateDisplayTime()
         {
             TimeSpan timeSpan = DateTime.Now - _startTime;
-            DisplayTime = $"{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+            // Including hours in the DisplayTime
+            DisplayTime = $"{timeSpan.Hours:D2}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
         }
+
         public string Transact
         {
             get => _transact;

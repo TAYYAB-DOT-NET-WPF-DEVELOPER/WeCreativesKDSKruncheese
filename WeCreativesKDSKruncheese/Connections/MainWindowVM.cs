@@ -267,7 +267,7 @@ namespace WeCreatives_KDSPJ.Connections
         {
             
             using (OracleHelper.GetCon())
-                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE KDS_LOC =  " + KDSLOC).Rows[0][0]);
+                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE OPENDATE = (SELECT MAX(OPENDATE) FROM KDS) AND KDS_LOC =  " + KDSLOC).Rows[0][0]);
         }
         public  string GetAverageMakeTime()
         {
@@ -308,7 +308,7 @@ namespace WeCreatives_KDSPJ.Connections
         public static int GetCurrentTotal()
         {
             using (OracleHelper.GetCon())
-                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 AND KDS_LOC= " + KDSLOC).Rows[0][0]);
+                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC= " + KDSLOC).Rows[0][0]);
         }
         private void FocusGrid()
         {
@@ -334,7 +334,7 @@ namespace WeCreatives_KDSPJ.Connections
             {
                 ObservableCollection<KDSModel> orders = new ObservableCollection<KDSModel>();
                 var KDSLOC = Convert.ToInt32(kdcLocValue);
-                string query = @"select * from KDS where bumped <>1 AND KDS_LOC = " + KDSLOC;
+                string query = @"select * from KDS where bumped <>1 AND opendate =(select max(opendate) from kds) and KDS_LOC = " + KDSLOC;
                 string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=KRC)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
