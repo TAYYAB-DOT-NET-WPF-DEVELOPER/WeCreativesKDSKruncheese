@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using WeCreatives_KDSPJ.Connections;
 using WeCreatives_KDSPJ;
+using WeCreativesKDSKruncheese.Connections;
+using WeCreativesKDSKruncheese.Views;
 
 namespace WeCreativesKDSKruncheese
 {
@@ -28,14 +30,17 @@ namespace WeCreativesKDSKruncheese
         {
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<StatusQuery>();
-            services.AddSingleton<MainWindowVM>();
+            services.AddTransient<MainWindowVM>();
+            services.AddTransient<HistorywindowVM>(); // Add HistoryWindowVM here
             services.AddTransient(s => new MainWindow
             {
                 DataContext = s.GetRequiredService<MainWindowVM>()
             });
-
+            services.AddTransient(s => new HistoryWindow
+            {
+                DataContext = s.GetRequiredService<HistorywindowVM>()
+            });
             _serviceprovider = services.BuildServiceProvider();
-
         }
         protected override void OnStartup(StartupEventArgs e)
         {

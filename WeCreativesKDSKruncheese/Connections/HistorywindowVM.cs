@@ -2,24 +2,39 @@
 using Microsoft.Extensions.DependencyInjection;
 using Oracle.ManagedDataAccess.Client;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.IO.Packaging;
 using System.Linq;
-using System.Windows.Controls;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
-using WeCreativesKDSKruncheese;
-using WeCreativesKDSKruncheese.Connections;
+using WeCreatives_KDSPJ;
+using WeCreatives_KDSPJ.Connections;
 using WeCreativesKDSKruncheese.Views;
 
-namespace WeCreatives_KDSPJ.Connections
+namespace WeCreativesKDSKruncheese.Connections
 {
-    public class MainWindowVM : ViewModelBase
+    public class HistorywindowVM:ViewModelBase
     {
-        // DateTime maxOpenDate;
         string kdcLocValue = App.KdcLoc;
         private readonly IServiceProvider _serviceProvider;
+        private bool _isStrikethrough;
 
+        public bool IsStrikethrough
+        {
+            get => _isStrikethrough;
+            set
+            {
+                if (_isStrikethrough != value)
+                {
+                    _isStrikethrough = value;
+                    OnPropertyChanged(nameof(IsStrikethrough));
+                }
+            }
+        }
         public static int KDSLOC { get; set; }
         private string _kdsnamee = App.KdcName;
         public string KDSNAMEE
@@ -126,7 +141,7 @@ namespace WeCreatives_KDSPJ.Connections
             set { _kDSNAME = value; OnPropertyChanged(nameof(KDSAPPNAME)); }
         }
 
-         private int _currentItemCount;
+        private int _currentItemCount;
         public int CurrentItemCount
         {
             get => _currentItemCount;
@@ -158,10 +173,11 @@ namespace WeCreatives_KDSPJ.Connections
         }
         public ICommand SelectNextItemCommand { get; }
         public ICommand SelectPreviousItemCommand { get; }
-        public MainWindowVM( StatusQuery statusQuery,IServiceProvider serviceProvider)
+        public HistorywindowVM(StatusQuery statusQuery, IServiceProvider serviceProvider)
         {
             _querystrings = statusQuery;
             KDSNAME = KDSNAMEE;
+            IsStrikethrough = true;
             KDSAPPNAME = KDSNAME;
 
             KDSLOC = Convert.ToInt32(kdcLocValue);
@@ -181,7 +197,7 @@ namespace WeCreatives_KDSPJ.Connections
 
             // Initialize the order check timer
             _orderCheckTimer = new DispatcherTimer();
-            _orderCheckTimer.Interval = TimeSpan.FromSeconds(3);
+            _orderCheckTimer.Interval = TimeSpan.FromSeconds(10);
             _orderCheckTimer.Tick += OrderCheckTimer_Tick;
 
             // Call CheckForOrder method immediately to update the orders without waiting for the first tick
@@ -204,8 +220,9 @@ namespace WeCreatives_KDSPJ.Connections
             };
             currentTimeUpdateTimer.Start();
 
-            SelectedIndex = 0;
+            SelectedIndex =0;
         }
+
         private void UpdateStatusVisibility()
         {
             OnPropertyChanged(nameof(IsFryer));
@@ -227,6 +244,7 @@ namespace WeCreatives_KDSPJ.Connections
                         if (SelectedIndex < AllOrders.Count - 1)
                         {
                             SelectedIndex++;
+
                         }
                         break;
 
@@ -238,154 +256,130 @@ namespace WeCreatives_KDSPJ.Connections
                             SelectedIndex--;
                         }
                         break;
-
-                    case Key.Enter:
-                        ExecuteEnterAction();
-                        break;
-                    case Key.Next: // For the '5' key above letters
-                    case Key.NumPad3: // For the '5' key on the numeric keypad
+                    case Key.Clear: // For the '5' key above letters
+                    case Key.NumPad5: // For the '5' key on the numeric keypad
                         OpenMainWindow();
-                        // CloseCurrentWindow();
+                       // CloseCurrentWindow();
                         break;
                 }
             }
         }
+
         private void OpenMainWindow()
         {
-            HistoryWindow historyWindow = new HistoryWindow();
-           
-            historyWindow.DataContext = _serviceProvider.GetRequiredService<HistorywindowVM>(); // Set DataContext to HistoryWindowVM instance
-            System.Windows.Application.Current.MainWindow.Close();
+            // Get the current HistoryWindow instance
+            var historyWindow = System.Windows.Application.Current.Windows.OfType<HistoryWindow>().FirstOrDefault();
 
-            historyWindow.Show();
+            // Create an instance of the MainWindow and set its DataContext
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.DataContext = _serviceProvider.GetRequiredService<MainWindowVM>();
 
-            // Optionally, if you're calling this from another window and want to close the current window
+            // Set the application's MainWindow property
+            System.Windows.Application.Current.MainWindow = mainWindow;
 
+            // Close the HistoryWindow if it exists
+            historyWindow?.Close();
 
+            // Show the MainWindow
+            mainWindow.Show();
+
+            // No need for dummy window as we've set the MainWindow before closing the HistoryWindow
         }
-        private void ExecuteEnterAction()
-        {
-            if (SelectedIndex >= 0 && SelectedIndex < AllOrders.Count)
-            {
-                string query =string.Empty;
-                var selectedItem = AllOrders[SelectedIndex];
-                var trno = selectedItem.TRNO;
-                var totalBumpingTimeSeconds = 0;
-                if (KdsdateTime != null)
-                {
-                    TimeSpan totalBumpingTimeSpan = DateTime.Now - KdsdateTime; // Assuming kdsdateTime is a DateTime?
-                     totalBumpingTimeSeconds = (int)totalBumpingTimeSpan.TotalSeconds;
-                }
-                if (KDSLOC == 25)
-                {
-                    query = "update kds set BRGR_STS=1  where pkcode=" + trno;
 
-                }
-                else
-                {
-                    query = "update kds set bumped=1 , bump_time=" + totalBumpingTimeSeconds + " where pkcode=" + trno;
 
-                }
-              string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=KRC)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
-              //  string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=182.180.159.89)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
 
-                using (OracleConnection connection = new OracleConnection(connectionString))
-                {
-                    connection.Open();
-                    using (OracleCommand cmd = new OracleCommand(query, connection))
-                    {
-                        using (OracleDataAdapter adapter = new OracleDataAdapter(cmd))
-                        {
-                            DataTable dt = new DataTable();
-                            adapter.Fill(dt);
-                            CheckForOrder();
-                            SelectedIndex = 0;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // Handle the case when no item is selected
-            }
-        }
+
+
+        //public static int GetTotal()
+        //{
+
+        //    using (OracleHelper.GetCon())
+        //        return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE OPENDATE = (SELECT MAX(OPENDATE) FROM KDS) AND KDS_LOC =  " + KDSLOC).Rows[0][0]);
+        //}
         public static int GetTotal()
         {
-            
+
             using (OracleHelper.GetCon())
-                if(KDSLOC ==24 )
-                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE OPENDATE = (SELECT MAX(OPENDATE) FROM KDS) AND KDS_LOC IN (  " + KDSLOC + ", 25 )").Rows[0][0]);
-                    else
-                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE OPENDATE = (SELECT MAX(OPENDATE) FROM KDS) AND KDS_LOC =   " + KDSLOC ).Rows[0][0]);
+                if (KDSLOC == 24)
+                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE OPENDATE = (SELECT MAX(OPENDATE) FROM KDS) AND KDS_LOC IN (  " + KDSLOC + ", 25 )").Rows[0][0]);
+                else
+                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds WHERE OPENDATE = (SELECT MAX(OPENDATE) FROM KDS) AND KDS_LOC   = " + KDSLOC).Rows[0][0]);
 
         }
-        public  string GetAverageMakeTime()
+        public string GetAverageMakeTime()
         {
             string query = _querystrings.average_make_time;
             string queryparameter = query + "and KDS_LOC=" + KDSLOC;
 
             using (OracleHelper.GetCon())
                 return (OracleHelper.SelectRec(queryparameter).Rows[0][0]).ToString();
-        } 
-        public  string GetAverageRackTime()
+        }
+        public string GetAverageRackTime()
         {
             string query = _querystrings.average_rack_time;
 
             using (OracleHelper.GetCon())
                 return (OracleHelper.SelectRec(query).Rows[0][0]).ToString();
         }
-        public  string GetAverageOTDTime()
+        public string GetAverageOTDTime()
         {
             string query = _querystrings.average_otd_time;
 
             using (OracleHelper.GetCon())
                 return (OracleHelper.SelectRec(query).Rows[0][0]).ToString();
         }
-        public  string GetAverageTTDTTime()
+        public string GetAverageTTDTTime()
         {
             string query = _querystrings.average_ttdt_time;
 
             using (OracleHelper.GetCon())
                 return (OracleHelper.SelectRec(query).Rows[0][0]).ToString();
         }
-        public  string GetAverageCSCPERCENTAGE()
+        public string GetAverageCSCPERCENTAGE()
         {
             string query = _querystrings.average_CSC_percentage;
 
             using (OracleHelper.GetCon())
                 return (OracleHelper.SelectRec(query).Rows[0][0]).ToString();
         }
+        //public static int GetCurrentTotal()
+        //{
+        //    using (OracleHelper.GetCon())
+        //        return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC= " + KDSLOC).Rows[0][0]);
+        //}
         public static int GetCurrentTotal()
         {
             using (OracleHelper.GetCon())
-                
-                if(KDSLOC ==24)
-                return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC IN ( " + KDSLOC + ",25)").Rows[0][0]);
-                else if(KDSLOC == 25)
+
+                if (KDSLOC == 24)
+                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC IN ( " + KDSLOC + ",25)").Rows[0][0]);
+                else if (KDSLOC == 25)
                 {
-                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where BRGR_STS <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC =" + KDSLOC  ).Rows[0][0]);
+                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where BRGR_STS <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC = " + KDSLOC).Rows[0][0]);
                 }
                 else
-                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC =  " + KDSLOC ).Rows[0][0]);
+                    return Convert.ToInt32(OracleHelper.SelectRec("select count(*) total from kds where bumped <>1 and opendate = (select max(opendate) from kds) AND KDS_LOC =  " + KDSLOC).Rows[0][0]);
 
         }
+
         private void FocusGrid()
         {
-             System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                System.Windows.FrameworkElement grid =
-                    System.Windows.Application.Current.MainWindow.FindName("listView") as System.Windows.FrameworkElement;
-                grid?.Focus();
+                var historyWindow = System.Windows.Application.Current.MainWindow as HistoryWindow;
+                if (historyWindow != null)
+                {
+                    var grid = historyWindow.FindName("Grid") as System.Windows.Controls.Grid;
+                    grid?.Focus();
+                }
             });
         }
+
         private void OrderCheckTimer_Tick(object sender, EventArgs e)
         {
             CheckForOrder();
-            foreach (var order in AllOrders)
-            {
-                order.UpdateDisplayTime();
-            }
-             SelectedIndex = 0;
+            
+            SelectedIndex = 0;
         }
         private void CheckForOrder()
         {
@@ -394,22 +388,17 @@ namespace WeCreatives_KDSPJ.Connections
                 ObservableCollection<KDSModel> orders = new ObservableCollection<KDSModel>();
                 var KDSLOC = Convert.ToInt32(kdcLocValue);
                 string query = string.Empty;
-                if (KDSLOC == 24)
+                if(KDSLOC == 24)
                 {
-                    query = @"select * from KDS  WHERE BUMPED <>1 AND opendate =(select max(opendate) from kds) and KDS_LOC IN ( " + KDSLOC + ", 25) order by transact ";
-
+                    query = @"select * from KDS WHERE opendate =(select max(opendate) from kds) and KDS_LOC IN ( " + KDSLOC + ", 25) order by transact desc";
                 }
-                else if(KDSLOC == 25)
+                else 
                 {
-                    query = @"select  * from KDS  WHERE BRGR_STS <>1 AND opendate =(select max(opendate) from kds) and KDS_LOC IN ( " + KDSLOC + ") order by transact ";
-
-                }
-                else
-                {
-                    query = @"select * from KDS WHERE BUMPED <>1 AND opendate =(select max(opendate) from kds) and KDS_LOC = " + KDSLOC + " order by transact ";
+                    query = @"select * from KDS WHERE opendate =(select max(opendate) from kds) and KDS_LOC = " + KDSLOC + " order by transact desc";
                 }
                 string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=KRC)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
-             //   string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=182.180.159.89)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
+              //  string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=182.180.159.89)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
+
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
                     connection.Open();
@@ -426,7 +415,17 @@ namespace WeCreatives_KDSPJ.Connections
                                 string description = dr["PRODUCT_NAME"].ToString();
                                 string TYPE = dr["SALETYPE_NAME"].ToString();
                                 int trno = Convert.ToInt32(dr["PKCODE"]);
-                                string vrmrks = dr["VRMKS"].ToString();
+                                int bumped = Convert.ToInt32(dr["BUMPED"]);
+                                string VRMRKS = dr["VRMKS"].ToString();
+                                string status = string.Empty;
+                                if (bumped == 1)
+                                {
+                                    status = "Bumped";
+                                }
+                                else
+                                {
+                                    status = "In Process";
+                                }
 
                                 TimeSpan kdsTimeSpan; // This should be a TimeSpan to hold the difference between two DateTime objects.
 
@@ -439,38 +438,39 @@ namespace WeCreatives_KDSPJ.Connections
                                     {
                                         Descript = description,
                                         Transact = transaction,
-                                        StartTime = startTime, // Store the actual start time in the model.
+                                        Status = status, // Store the actual start time in the model.
                                         TRNO = trno,
                                         TYPE = TYPE,
-                                        VRMKS=vrmrks
+                                        VRMKS=VRMRKS
                                     };
-                                    if (vrmrks == "VOIDED")
+                                    if(VRMRKS== "VOIDED")
                                     {
-                                        model.IsStrikethrough = true;
+                                        model.IsStrikethrough= true;
                                     }
+
                                     // The DisplayTime will be calculated based on the StartTime and the current time.
                                     model.UpdateDisplayTime(); // Ensure this method updates the DisplayTime based on the StartTime.
-
-                                    orders.Add(model);
                                     
+                                    orders.Add(model);
+
                                 }
 
-                               
+
                             }
                             
                             AllOrders = orders;
                         }
-                        
+
                     }
                 }
                 TotalItemCount = GetTotal();
-                CurrentItemCount=GetCurrentTotal();
+                CurrentItemCount = GetCurrentTotal();
                 AverageMakeTime = GetAverageMakeTime();
                 //AverageoCSCTime =GetAverageCSCPERCENTAGE();
                 //AverageotdTime =GetAverageOTDTime();
                 //AverageottdtTime = GetAverageTTDTTime();
                 //AverageRackTime=GetAverageRackTime();
-               // AllOrders = orders;
+                // AllOrders = orders;
                 if (AllOrders.Count > 0)
                 {
                     SelectedIndex = 0;
@@ -482,5 +482,6 @@ namespace WeCreatives_KDSPJ.Connections
                 Console.WriteLine("Error occurred: " + ex.Message);
             }
         }
+
     }
 }

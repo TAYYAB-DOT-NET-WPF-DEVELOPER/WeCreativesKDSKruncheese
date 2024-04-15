@@ -25,36 +25,36 @@ namespace WeCreatives_KDSPJ
         public MainWindow()
         {
             InitializeComponent();
-            Closing += MainWindow_Closing;
+        //    Closing += MainWindow_Closing;
             // listView.SelectedIndex = 0;
         }
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            CloseWindow passwordDialog = new CloseWindow();
-            if (passwordDialog.ShowDialog() == true)
-            {
-                // Check the entered password
-                if (CheckPassword(passwordDialog.EnteredPassword))
-                {
-                    // Password is correct, perform cleanup or other actions if needed
-                }
-                else
-                {
-                    // Password is incorrect, cancel the closing event
-                    e.Cancel = true;
-                }
-            }
-            else
-            {
-                e.Cancel = true;
-            }
-        }
+        //private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        //{
+        //    CloseWindow passwordDialog = new CloseWindow();
+        //    if (passwordDialog.ShowDialog() == true)
+        //    {
+        //        // Check the entered password
+        //        if (CheckPassword(passwordDialog.EnteredPassword))
+        //        {
+        //            // Password is correct, perform cleanup or other actions if needed
+        //        }
+        //        else
+        //        {
+        //            // Password is incorrect, cancel the closing event
+        //            e.Cancel = true;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        e.Cancel = true;
+        //    }
+        //}
 
-        private bool CheckPassword(string enteredPassword)
-        {
-            string correctPassword = "1122";
-            return enteredPassword == correctPassword;
-        }
+        //private bool CheckPassword(string enteredPassword)
+        //{
+        //    string correctPassword = "1122";
+        //    return enteredPassword == correctPassword;
+        //}
 
     }
 }

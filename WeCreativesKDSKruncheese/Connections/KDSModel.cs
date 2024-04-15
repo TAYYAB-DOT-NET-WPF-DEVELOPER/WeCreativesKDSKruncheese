@@ -7,6 +7,8 @@ namespace WeCreatives_KDSPJ.Connections
     {
         private string _transact;
         private string _descript;
+        private string _vrmks;
+        private string _status;
         private string _type;
         private string _time;
         private int _trno;
@@ -37,6 +39,18 @@ namespace WeCreatives_KDSPJ.Connections
                 {
                     _displayTime = value;
                     OnPropertyChanged(nameof(DisplayTime));
+                }
+            }
+        } 
+        public string VRMKS
+        {
+            get => _vrmks;
+            set
+            {
+                if (_vrmks != value)
+                {
+                    _vrmks = value;
+                    OnPropertyChanged(nameof(VRMKS));
                 }
             }
         }
@@ -70,6 +84,17 @@ namespace WeCreatives_KDSPJ.Connections
                 {
                     _descript = value;
                     OnPropertyChanged(nameof(Descript));
+                }
+            }
+        }public string Status
+        {
+            get => _status;
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged(nameof(Status));
                 }
             }
         }
@@ -122,6 +147,19 @@ namespace WeCreatives_KDSPJ.Connections
                 {
                     _bumped = value;
                     OnPropertyChanged(nameof(Bumped));
+                }
+            }
+        }
+        private bool _isStrikethrough;
+        public bool IsStrikethrough
+        {
+            get => _isStrikethrough;
+            set
+            {
+                if (_isStrikethrough != value)
+                {
+                    _isStrikethrough = value;
+                    OnPropertyChanged(nameof(IsStrikethrough));
                 }
             }
         }

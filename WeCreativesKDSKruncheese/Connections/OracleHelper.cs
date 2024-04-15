@@ -14,7 +14,7 @@ namespace WeCreatives_KDSPJ.Connections
         public static OracleConnection GetCon()
         {
             string connectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=KRC)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=SCAR)));User Id=KRC;Password=KRC;";
-
+         
             int num1 = 0;
             int num2 = 5;
             int num3 = 10;
